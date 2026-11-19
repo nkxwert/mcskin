@@ -49,8 +49,44 @@ public class SkinConfig {
 
     public boolean enabled = false;
     public String activeFile = null;
-    /** 내 캐릭터의 갑옷을 나에게만 숨긴다 (스킨 적용 여부와 무관) */
+    /** 이전 버전 설정(갑옷 전체 숨김). 불러올 때 부위별 설정으로 옮긴다. */
     public boolean hideArmor = false;
+    /** 내 캐릭터의 갑옷을 부위별로 나에게만 숨긴다 (스킨 적용 여부와 무관) */
+    public boolean hideHelmet = false;
+    public boolean hideChestplate = false;
+    public boolean hideLeggings = false;
+    public boolean hideBoots = false;
+
+    /** 갑옷 칸 번호 (InventoryPlayer.armorInventory 순서) */
+    public static final int SLOT_BOOTS = 0, SLOT_LEGGINGS = 1, SLOT_CHESTPLATE = 2, SLOT_HELMET = 3;
+    public static final String[] SLOT_NAMES = {"부츠", "레깅스", "흉갑", "투구"};
+
+    public boolean isArmorHidden(int slot) {
+        switch (slot) {
+            case SLOT_HELMET: return hideHelmet;
+            case SLOT_CHESTPLATE: return hideChestplate;
+            case SLOT_LEGGINGS: return hideLeggings;
+            case SLOT_BOOTS: return hideBoots;
+            default: return false;
+        }
+    }
+
+    public void setArmorHidden(int slot, boolean hide) {
+        switch (slot) {
+            case SLOT_HELMET: hideHelmet = hide; break;
+            case SLOT_CHESTPLATE: hideChestplate = hide; break;
+            case SLOT_LEGGINGS: hideLeggings = hide; break;
+            case SLOT_BOOTS: hideBoots = hide; break;
+        }
+    }
+
+    public boolean isAnyArmorHidden() {
+        return hideHelmet || hideChestplate || hideLeggings || hideBoots;
+    }
+
+    public boolean isAllArmorHidden() {
+        return hideHelmet && hideChestplate && hideLeggings && hideBoots;
+    }
     public List<SkinEntry> skins = new ArrayList<SkinEntry>();
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -72,6 +108,11 @@ public class SkinConfig {
         }
         if (cfg == null) cfg = new SkinConfig();
         if (cfg.skins == null) cfg.skins = new ArrayList<SkinEntry>();
+        if (cfg.hideArmor) {
+            // 이전 버전에서 "갑옷 숨김"을 켜 뒀다면 모든 부위를 숨김으로 옮긴다
+            for (int slot = 0; slot < 4; slot++) cfg.setArmorHidden(slot, true);
+            cfg.hideArmor = false;
+        }
         cfg.syncWithFolder();
         return cfg;
     }

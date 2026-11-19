@@ -79,8 +79,15 @@ public class SelfSkinMod {
         return null;
     }
 
-    public static void setHideArmor(boolean hide) {
-        config.hideArmor = hide;
+    /** 한 부위의 갑옷 숨김 설정 (slot: SkinConfig.SLOT_*) */
+    public static void setArmorHidden(int slot, boolean hide) {
+        config.setArmorHidden(slot, hide);
+        config.save();
+    }
+
+    /** 모든 부위의 갑옷 숨김 설정 */
+    public static void setAllArmorHidden(boolean hide) {
+        for (int slot = 0; slot < 4; slot++) config.setArmorHidden(slot, hide);
         config.save();
     }
 

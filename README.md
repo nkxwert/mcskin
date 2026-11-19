@@ -24,7 +24,10 @@ JDK 17을 설치한 뒤:
 - `/selfskin on`, `/selfskin off` → 켜기/끄기
 - 스킨 png는 `.minecraft/selfskin/skins/`에 넣고 [새로고침] (64x64 또는 64x32 크기)
 - 닉네임 입력 후 [가져오기]를 누르면 해당 계정 스킨을 받아와 바로 적용
-- [갑옷] 버튼 또는 `/selfskin armor` → 내 갑옷을 나에게만 숨기기/보이기 (`/selfskin armor off` 숨김, `on` 보임). 스킨 적용 여부와 상관없이 동작
+- 갑옷 부위별 숨기기 (나에게만, 스킨 적용 여부와 상관없이 동작)
+  - 메뉴의 [투구] [흉갑] [레깅스] [부츠] 버튼으로 각각 보임/숨김 전환
+  - `/selfskin armor` → 전체 전환, `/selfskin armor off` 전체 숨김, `on` 전체 보임
+  - `/selfskin armor helmet off` → 투구만 숨김 (`chestplate`, `leggings`, `boots`도 같은 방식, `on`/`off` 생략 시 전환)
 - [체형] 버튼으로 Steve(두꺼운 팔) / Alex(얇은 팔) 전환
 - 설정 파일: `.minecraft/config/selfskin.json`
 
