@@ -49,6 +49,8 @@ public class SkinConfig {
 
     public boolean enabled = false;
     public String activeFile = null;
+    /** 내 캐릭터의 갑옷을 나에게만 숨긴다 (스킨 적용 여부와 무관) */
+    public boolean hideArmor = false;
     public List<SkinEntry> skins = new ArrayList<SkinEntry>();
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();

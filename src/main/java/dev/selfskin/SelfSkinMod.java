@@ -38,6 +38,7 @@ public class SelfSkinMod {
         ClientRegistry.registerKeyBinding(openKey);
         ClientCommandHandler.instance.registerCommand(new CommandSelfSkin());
         MinecraftForge.EVENT_BUS.register(this);
+        ArmorHider.install();
 
         // 마지막으로 쓰던 스킨 복원
         SkinConfig.SkinEntry active = config.getActive();
@@ -76,6 +77,11 @@ public class SelfSkinMod {
         config.save();
         skins.setActive(on);
         return null;
+    }
+
+    public static void setHideArmor(boolean hide) {
+        config.hideArmor = hide;
+        config.save();
     }
 
     @SubscribeEvent

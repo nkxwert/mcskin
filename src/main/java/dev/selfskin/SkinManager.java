@@ -158,7 +158,7 @@ public class SkinManager {
         return out;
     }
 
-    private static Field findField(Class<?> owner, Class<?> type, int index, String... names) {
+    static Field findField(Class<?> owner, Class<?> type, int index, String... names) {
         for (String name : names) {
             try {
                 Field f = owner.getDeclaredField(name);

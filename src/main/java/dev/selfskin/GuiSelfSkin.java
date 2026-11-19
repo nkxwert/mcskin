@@ -15,7 +15,7 @@ import java.util.List;
 public class GuiSelfSkin extends GuiScreen {
 
     private static final int BTN_DONE = 0, BTN_TOGGLE = 1, BTN_MODEL = 2, BTN_FOLDER = 3,
-            BTN_REFRESH = 4, BTN_FETCH = 5, BTN_PREV = 10, BTN_NEXT = 11, BTN_ENTRY = 100;
+            BTN_REFRESH = 4, BTN_FETCH = 5, BTN_ARMOR = 6, BTN_PREV = 10, BTN_NEXT = 11, BTN_ENTRY = 100;
 
     private int page = 0;
     private int rows;
@@ -76,6 +76,8 @@ public class GuiSelfSkin extends GuiScreen {
         buttonList.add(model);
         buttonList.add(new GuiButton(BTN_FOLDER, colX, 80, colW, 20, "스킨 폴더 열기"));
         buttonList.add(new GuiButton(BTN_REFRESH, colX, 104, colW, 20, "새로고침"));
+        buttonList.add(new GuiButton(BTN_ARMOR, colX, 128, colW, 20,
+                "갑옷: " + (SelfSkinMod.config.hideArmor ? "§c숨김" : "§a보임")));
 
         GuiButton fetch = new GuiButton(BTN_FETCH, left + listW + 4, height - 29, 60, 20, "가져오기");
         fetch.enabled = !fetching;
@@ -116,6 +118,8 @@ public class GuiSelfSkin extends GuiScreen {
             } else {
                 setStatus("스킨 " + cfg.skins.size() + "개", 0xAAAAAA);
             }
+        } else if (b.id == BTN_ARMOR) {
+            SelfSkinMod.setHideArmor(!cfg.hideArmor);
         } else if (b.id == BTN_FETCH) {
             startFetch();
         } else if (b.id == BTN_PREV) {
