@@ -56,6 +56,8 @@ public class SkinConfig {
     public boolean hideChestplate = false;
     public boolean hideLeggings = false;
     public boolean hideBoots = false;
+    /** 머리에 쓴 블록(호박, 머리, 블록 등)을 나에게만 숨긴다 */
+    public boolean hideHeadBlock = false;
 
     /** 갑옷 칸 번호 (InventoryPlayer.armorInventory 순서) */
     public static final int SLOT_BOOTS = 0, SLOT_LEGGINGS = 1, SLOT_CHESTPLATE = 2, SLOT_HELMET = 3;

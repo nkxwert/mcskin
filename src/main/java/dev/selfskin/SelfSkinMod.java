@@ -85,6 +85,11 @@ public class SelfSkinMod {
         config.save();
     }
 
+    public static void setHeadBlockHidden(boolean hide) {
+        config.hideHeadBlock = hide;
+        config.save();
+    }
+
     /** 모든 부위의 갑옷 숨김 설정 */
     public static void setAllArmorHidden(boolean hide) {
         for (int slot = 0; slot < 4; slot++) config.setArmorHidden(slot, hide);

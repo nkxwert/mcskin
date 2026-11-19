@@ -28,6 +28,7 @@ JDK 17을 설치한 뒤:
   - 메뉴의 [투구] [흉갑] [레깅스] [부츠] 버튼으로 각각 보임/숨김 전환
   - `/selfskin armor` → 전체 전환, `/selfskin armor off` 전체 숨김, `on` 전체 보임
   - `/selfskin armor helmet off` → 투구만 숨김 (`chestplate`, `leggings`, `boots`도 같은 방식, `on`/`off` 생략 시 전환)
+- 머리 블록(호박, 머리, 블록 등) 숨기기: 메뉴의 [머리 블록] 버튼 또는 `/selfskin armor headblock off` (`on` 보임). 갑옷 전체 명령에는 포함되지 않음
 - [체형] 버튼으로 Steve(두꺼운 팔) / Alex(얇은 팔) 전환
 - 설정 파일: `.minecraft/config/selfskin.json`
 

@@ -11,7 +11,7 @@ import java.util.List;
 /** /selfskin          → 메뉴 열기
  *  /selfskin on|off   → 켜기/끄기
  *  /selfskin armor [부위] [on|off] → 내 갑옷 보이기/숨기기
- *      부위: helmet, chestplate, leggings, boots (생략하면 전체), on/off 생략 시 전환 */
+ *      부위: helmet, chestplate, leggings, boots, headblock (생략하면 갑옷 전체), on/off 생략 시 전환 */
 public class CommandSelfSkin extends CommandBase {
 
     @Override
@@ -26,7 +26,7 @@ public class CommandSelfSkin extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/selfskin [on|off] | /selfskin armor [helmet|chestplate|leggings|boots] [on|off]";
+        return "/selfskin [on|off] | /selfskin armor [helmet|chestplate|leggings|boots|headblock] [on|off]";
     }
 
     @Override
@@ -52,10 +52,10 @@ public class CommandSelfSkin extends CommandBase {
     private void armor(ICommandSender sender, String[] args) {
         SkinConfig cfg = SelfSkinMod.config;
         int next = 1;
-        int slot = -1; // -1 = 전체
+        int slot = -1; // -1 = 갑옷 전체 (머리 블록은 포함하지 않음)
         if (args.length > next) {
             int s = parsePart(args[next]);
-            if (s >= 0) {
+            if (s != -1) {
                 slot = s;
                 next++;
             }
@@ -68,12 +68,16 @@ public class CommandSelfSkin extends CommandBase {
             else if ("off".equalsIgnoreCase(args[next])) hide = true;
             else {
                 sender.addChatMessage(new ChatComponentText("§c[SelfSkin] 알 수 없는 부위: " + args[next]
-                        + " §7(helmet, chestplate, leggings, boots)"));
+                        + " §7(helmet, chestplate, leggings, boots, headblock)"));
                 return;
             }
         }
 
-        if (slot >= 0) {
+        if (slot == HEAD_BLOCK) {
+            boolean h = hide != null ? hide : !cfg.hideHeadBlock;
+            SelfSkinMod.setHeadBlockHidden(h);
+            sender.addChatMessage(new ChatComponentText("§e[SelfSkin] 머리 블록: " + (h ? "§c숨김" : "§a보임")));
+        } else if (slot >= 0) {
             boolean h = hide != null ? hide : !cfg.isArmorHidden(slot);
             SelfSkinMod.setArmorHidden(slot, h);
             sender.addChatMessage(new ChatComponentText("§e[SelfSkin] " + SkinConfig.SLOT_NAMES[slot] + ": "
@@ -86,10 +90,14 @@ public class CommandSelfSkin extends CommandBase {
         }
     }
 
-    /** 부위 이름 → 갑옷 칸 번호. 모르는 이름이면 -1 */
+    /** parsePart 결과: 머리 블록 */
+    private static final int HEAD_BLOCK = -2;
+
+    /** 부위 이름 → 갑옷 칸 번호 (머리 블록은 HEAD_BLOCK). 모르는 이름이면 -1 */
     private static int parsePart(String s) {
         s = s.toLowerCase();
-        if (s.equals("helmet") || s.equals("head") || s.equals("투구")) return SkinConfig.SLOT_HELMET;
+        if (s.equals("headblock") || s.equals("skull") || s.equals("머리블록")) return HEAD_BLOCK;
+        if (s.equals("helmet") || s.equals("투구")) return SkinConfig.SLOT_HELMET;
         if (s.equals("chestplate") || s.equals("chest") || s.equals("흉갑")) return SkinConfig.SLOT_CHESTPLATE;
         if (s.equals("leggings") || s.equals("legs") || s.equals("레깅스")) return SkinConfig.SLOT_LEGGINGS;
         if (s.equals("boots") || s.equals("feet") || s.equals("부츠")) return SkinConfig.SLOT_BOOTS;
@@ -100,9 +108,9 @@ public class CommandSelfSkin extends CommandBase {
     public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
         if (args.length == 1) return getListOfStringsMatchingLastWord(args, "on", "off", "armor");
         if (args.length == 2 && "armor".equalsIgnoreCase(args[0])) {
-            return getListOfStringsMatchingLastWord(args, "helmet", "chestplate", "leggings", "boots", "on", "off");
+            return getListOfStringsMatchingLastWord(args, "helmet", "chestplate", "leggings", "boots", "headblock", "on", "off");
         }
-        if (args.length == 3 && "armor".equalsIgnoreCase(args[0]) && parsePart(args[1]) >= 0) {
+        if (args.length == 3 && "armor".equalsIgnoreCase(args[0]) && parsePart(args[1]) != -1) {
             return getListOfStringsMatchingLastWord(args, "on", "off");
         }
         return null;
