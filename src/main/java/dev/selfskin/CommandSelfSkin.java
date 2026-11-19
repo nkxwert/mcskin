@@ -33,9 +33,9 @@ public class CommandSelfSkin extends CommandBase {
             return;
         }
         if ("on".equalsIgnoreCase(args[0])) {
-            SelfSkinMod.setEnabled(true);
-            sender.addChatMessage(new ChatComponentText(SelfSkinMod.config.enabled
-                    ? "§a[SelfSkin] 켜짐" : "§c[SelfSkin] 먼저 메뉴에서 스킨을 선택하세요."));
+            String err = SelfSkinMod.setEnabled(true);
+            sender.addChatMessage(new ChatComponentText(err == null
+                    ? "§a[SelfSkin] 켜짐" : "§c[SelfSkin] " + err));
         } else if ("off".equalsIgnoreCase(args[0])) {
             SelfSkinMod.setEnabled(false);
             sender.addChatMessage(new ChatComponentText("§e[SelfSkin] 꺼짐"));

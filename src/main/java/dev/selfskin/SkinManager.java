@@ -1,6 +1,7 @@
 package dev.selfskin;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.ImageBufferDownload;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -11,6 +12,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 내 NetworkPlayerInfo의 스킨 필드만 바꿔치기한다.
@@ -19,22 +25,28 @@ import java.lang.reflect.Modifier;
  */
 public class SkinManager {
 
+    /** 항상 같은 위치를 쓴다. 스킨을 바꿀 때는 이 위치의 텍스처 객체만 교체한다. */
+    private static final ResourceLocation TEXTURE = new ResourceLocation("selfskin", "skins/self");
+
     private final Minecraft mc = Minecraft.getMinecraft();
 
-    private final Field fSkin;    // ResourceLocation locationSkin
-    private final Field fType;    // String skinType ("default" / "slim")
-    private final Field fLoaded;  // boolean playerTexturesLoaded
+    private final Field fSkin;       // NetworkPlayerInfo.locationSkin
+    private final Field fType;       // NetworkPlayerInfo.skinType ("default" / "slim")
+    private final Field fLoaded;     // NetworkPlayerInfo.playerTexturesLoaded
+    private final Field fPlayerInfo; // AbstractClientPlayer.playerInfo (플레이어가 캐시해 둔 객체)
 
-    private ResourceLocation customTexture;
+    private DynamicTexture texture;
     private String customModel = SkinConfig.MODEL_CLASSIC;
     private boolean active;
-    private NetworkPlayerInfo appliedTo;
+    /** 현재 스킨을 덮어쓴 객체들. 원래 스킨으로 되돌릴 때 사용한다. */
+    private final Set<NetworkPlayerInfo> applied = Collections.newSetFromMap(new IdentityHashMap<NetworkPlayerInfo, Boolean>());
 
     public SkinManager() {
         // 개발 환경(MCP 이름) → 실제 실행(SRG 이름) → 타입으로 찾기 순서로 시도
         fSkin = findField(NetworkPlayerInfo.class, ResourceLocation.class, 0, "locationSkin", "field_178865_e");
         fType = findField(NetworkPlayerInfo.class, String.class, 0, "skinType", "field_178863_g");
         fLoaded = findField(NetworkPlayerInfo.class, boolean.class, 0, "playerTexturesLoaded", "field_178864_d");
+        fPlayerInfo = findField(AbstractClientPlayer.class, NetworkPlayerInfo.class, 0, "playerInfo", "field_175157_a");
     }
 
     /** png를 읽어 텍스처로 등록한다. 메인 스레드에서 호출해야 한다. */
@@ -52,8 +64,13 @@ public class SkinManager {
         // 바닐라와 같은 처리: 64x32 구형 스킨 변환 + 투명 영역 정리
         img = new ImageBufferDownload().parseUserSkin(img);
 
-        releaseTexture();
-        customTexture = mc.getTextureManager().getDynamicTextureLocation("selfskin", new DynamicTexture(img));
+        // 새 텍스처를 먼저 등록한 뒤 이전 텍스처를 지운다.
+        // (이전 텍스처를 먼저 지우면 그 사이에 렌더링되는 프레임이 삭제된 GL 텍스처를 참조함)
+        DynamicTexture old = texture;
+        texture = new DynamicTexture(img);
+        mc.getTextureManager().loadTexture(TEXTURE, texture);
+        if (old != null) old.deleteGlTexture();
+
         customModel = SkinConfig.MODEL_SLIM.equals(model) ? SkinConfig.MODEL_SLIM : SkinConfig.MODEL_CLASSIC;
         return null;
     }
@@ -64,41 +81,56 @@ public class SkinManager {
 
     public void setActive(boolean active) {
         this.active = active;
-        if (!active) restore();
+        if (!active) restoreAll();
     }
 
     public boolean hasTexture() {
-        return customTexture != null;
+        return texture != null;
     }
 
     public void unload() {
-        restore();
-        releaseTexture();
+        restoreAll();
+        if (texture != null) {
+            mc.getTextureManager().deleteTexture(TEXTURE);
+            texture.deleteGlTexture();
+            texture = null;
+        }
     }
 
     /** 매 틱/프레임 호출. 바닐라가 원래 스킨을 늦게 받아와 덮어써도 다시 적용된다. */
     public void update() {
-        if (!active || customTexture == null) {
-            if (appliedTo != null) restore();
+        if (!active || texture == null) {
+            if (!applied.isEmpty()) restoreAll();
             return;
         }
-        NetworkPlayerInfo info = findSelf();
-        if (info == null) return;
-        if (appliedTo != null && appliedTo != info) restore(); // 서버/로비 이동으로 객체가 바뀐 경우
+        List<NetworkPlayerInfo> targets = findSelf();
+        if (targets.isEmpty()) return;
+
+        // 서버/로비 이동으로 객체가 바뀐 경우 이전 객체는 원래대로 돌려 놓는다
+        if (!applied.isEmpty()) {
+            for (NetworkPlayerInfo old : new ArrayList<NetworkPlayerInfo>(applied)) {
+                if (!targets.contains(old)) restore(old);
+            }
+        }
         try {
-            if (fSkin.get(info) != customTexture) fSkin.set(info, customTexture);
-            if (!customModel.equals(fType.get(info))) fType.set(info, customModel);
-            appliedTo = info;
+            for (NetworkPlayerInfo info : targets) {
+                if (fSkin.get(info) != TEXTURE) fSkin.set(info, TEXTURE);
+                if (!customModel.equals(fType.get(info))) fType.set(info, customModel);
+                applied.add(info);
+            }
         } catch (IllegalAccessException e) {
             SelfSkinMod.LOG.error("스킨 적용 실패", e);
         }
     }
 
+    private void restoreAll() {
+        for (NetworkPlayerInfo info : new ArrayList<NetworkPlayerInfo>(applied)) restore(info);
+        applied.clear();
+    }
+
     /** 원래 스킨으로 되돌린다: 필드를 비우면 바닐라가 Mojang 스킨을 다시 불러온다. */
-    private void restore() {
-        NetworkPlayerInfo info = appliedTo;
-        appliedTo = null;
-        if (info == null) return;
+    private void restore(NetworkPlayerInfo info) {
+        applied.remove(info);
         try {
             fSkin.set(info, null);
             fType.set(info, null);
@@ -108,16 +140,22 @@ public class SkinManager {
         }
     }
 
-    private void releaseTexture() {
-        if (customTexture != null) {
-            mc.getTextureManager().deleteTexture(customTexture);
-            customTexture = null;
+    /**
+     * 내 플레이어 정보 객체들.
+     * 탭 리스트는 NetHandler의 객체를 쓰지만, 플레이어 엔티티는 처음 받은 객체를 캐시해 두고 계속 쓴다.
+     * 서버가 탭 리스트 항목만 다시 보내면 두 객체가 달라지므로 둘 다 덮어써야 한다.
+     */
+    private List<NetworkPlayerInfo> findSelf() {
+        List<NetworkPlayerInfo> out = new ArrayList<NetworkPlayerInfo>(2);
+        if (mc.thePlayer == null || mc.getNetHandler() == null) return out;
+        NetworkPlayerInfo fromList = mc.getNetHandler().getPlayerInfo(mc.thePlayer.getUniqueID());
+        if (fromList != null) out.add(fromList);
+        try {
+            NetworkPlayerInfo cached = (NetworkPlayerInfo) fPlayerInfo.get(mc.thePlayer);
+            if (cached != null && cached != fromList) out.add(cached);
+        } catch (IllegalAccessException ignored) {
         }
-    }
-
-    private NetworkPlayerInfo findSelf() {
-        if (mc.thePlayer == null || mc.getNetHandler() == null) return null;
-        return mc.getNetHandler().getPlayerInfo(mc.thePlayer.getUniqueID());
+        return out;
     }
 
     private static Field findField(Class<?> owner, Class<?> type, int index, String... names) {
@@ -141,6 +179,6 @@ public class SkinManager {
                 }
             }
         }
-        throw new IllegalStateException("NetworkPlayerInfo 필드를 찾지 못함: " + names[0]);
+        throw new IllegalStateException(owner.getSimpleName() + " 필드를 찾지 못함: " + names[0]);
     }
 }

@@ -58,6 +58,7 @@ public final class SkinFetcher {
         if (textures == null || !textures.has("SKIN")) throw new IllegalStateException("기본 스킨을 쓰는 계정입니다.");
         JsonObject skin = textures.getAsJsonObject("SKIN");
         String url = skin.get("url").getAsString();
+        if (url.startsWith("http://textures.minecraft.net/")) url = "https://" + url.substring("http://".length());
         String model = SkinConfig.MODEL_CLASSIC;
         if (skin.has("metadata") && skin.getAsJsonObject("metadata").has("model")
                 && "slim".equals(skin.getAsJsonObject("metadata").get("model").getAsString())) {

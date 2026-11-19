@@ -12,6 +12,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -104,7 +105,9 @@ public class SkinConfig {
             if (e.file == null || !onDisk.contains(e.file)) it.remove();
             else known.add(e.file);
         }
-        for (String file : onDisk) {
+        List<String> added = new ArrayList<String>(onDisk);
+        Collections.sort(added, String.CASE_INSENSITIVE_ORDER); // HashSet 순서는 매번 달라지므로 정렬
+        for (String file : added) {
             if (!known.contains(file)) {
                 String name = file.substring(0, file.length() - 4);
                 skins.add(new SkinEntry(name, file, MODEL_CLASSIC, "file"));
@@ -120,6 +123,13 @@ public class SkinConfig {
     public SkinEntry find(String file) {
         if (file == null) return null;
         for (SkinEntry e : skins) if (file.equals(e.file)) return e;
+        return null;
+    }
+
+    public SkinEntry findIgnoreCase(String file) {
+        SkinEntry exact = find(file);
+        if (exact != null || file == null) return exact;
+        for (SkinEntry e : skins) if (file.equalsIgnoreCase(e.file)) return e;
         return null;
     }
 

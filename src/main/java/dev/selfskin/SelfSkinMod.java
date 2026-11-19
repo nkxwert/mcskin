@@ -16,7 +16,7 @@ import org.lwjgl.input.Keyboard;
 
 import java.io.File;
 
-@Mod(modid = "selfskin", useMetadata = true, acceptableRemoteVersions = "*")
+@Mod(modid = "selfskin", useMetadata = true, clientSideOnly = true, acceptableRemoteVersions = "*")
 public class SelfSkinMod {
 
     public static final Logger LOG = LogManager.getLogger("SelfSkin");
@@ -63,15 +63,19 @@ public class SelfSkinMod {
         return null;
     }
 
-    public static void setEnabled(boolean on) {
+    /** 켜기/끄기. 켜기에 실패하면 오류 메시지를 반환한다. */
+    public static String setEnabled(boolean on) {
         SkinConfig.SkinEntry active = config.getActive();
-        if (on && !skins.hasTexture() && active != null) {
-            apply(active);
-            return;
+        if (on && active == null) {
+            return "먼저 메뉴에서 스킨을 선택하세요.";
         }
-        config.enabled = on && skins.hasTexture();
+        if (on && !skins.hasTexture()) {
+            return apply(active);
+        }
+        config.enabled = on;
         config.save();
-        skins.setActive(config.enabled);
+        skins.setActive(on);
+        return null;
     }
 
     @SubscribeEvent

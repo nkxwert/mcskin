@@ -91,7 +91,8 @@ public class GuiSelfSkin extends GuiScreen {
             String err = SelfSkinMod.apply(e);
             setStatus(err == null ? "적용됨: " + e.name : err, err == null ? 0x55FF55 : 0xFF5555);
         } else if (b.id == BTN_TOGGLE) {
-            SelfSkinMod.setEnabled(!cfg.enabled);
+            String err = SelfSkinMod.setEnabled(!cfg.enabled);
+            if (err != null) setStatus(err, 0xFF5555);
         } else if (b.id == BTN_MODEL) {
             SkinConfig.SkinEntry e = cfg.getActive();
             if (e != null) {
@@ -103,8 +104,18 @@ public class GuiSelfSkin extends GuiScreen {
             openFolder(SkinConfig.getSkinsDir());
         } else if (b.id == BTN_REFRESH) {
             cfg.syncWithFolder();
-            if (cfg.getActive() == null) SelfSkinMod.skins.unload();
-            setStatus("스킨 " + cfg.skins.size() + "개", 0xAAAAAA);
+            SkinConfig.SkinEntry active = cfg.getActive();
+            if (active == null) {
+                SelfSkinMod.skins.unload();
+                SelfSkinMod.skins.setActive(false);
+                setStatus("스킨 " + cfg.skins.size() + "개", 0xAAAAAA);
+            } else if (cfg.enabled) {
+                // 사용 중인 png를 수정했을 수 있으므로 다시 읽는다
+                String err = SelfSkinMod.apply(active);
+                setStatus(err == null ? "스킨 " + cfg.skins.size() + "개" : err, err == null ? 0xAAAAAA : 0xFF5555);
+            } else {
+                setStatus("스킨 " + cfg.skins.size() + "개", 0xAAAAAA);
+            }
         } else if (b.id == BTN_FETCH) {
             startFetch();
         } else if (b.id == BTN_PREV) {
@@ -133,7 +144,8 @@ public class GuiSelfSkin extends GuiScreen {
                     fetching = false;
                     SkinConfig cfg = SelfSkinMod.config;
                     cfg.syncWithFolder();
-                    SkinConfig.SkinEntry e = cfg.find(r.file.getName());
+                    // Windows는 파일명 대소문자를 구분하지 않아 기존 "notch.png"에 덮어쓸 수 있다
+                    SkinConfig.SkinEntry e = cfg.findIgnoreCase(r.file.getName());
                     if (e == null) {
                         setStatus("저장 실패", 0xFF5555);
                     } else {
