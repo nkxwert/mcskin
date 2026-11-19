@@ -58,6 +58,8 @@ public class SkinConfig {
     public boolean hideBoots = false;
     /** 머리에 쓴 블록(호박, 머리, 블록 등)을 나에게만 숨긴다 */
     public boolean hideHeadBlock = false;
+    /** 내 망토를 나에게만 숨긴다 */
+    public boolean hideCape = false;
 
     /** 갑옷 칸 번호 (InventoryPlayer.armorInventory 순서) */
     public static final int SLOT_BOOTS = 0, SLOT_LEGGINGS = 1, SLOT_CHESTPLATE = 2, SLOT_HELMET = 3;
@@ -143,12 +145,17 @@ public class SkinConfig {
                 if (f.isFile() && f.getName().toLowerCase().endsWith(".png")) onDisk.add(f.getName());
             }
         }
+        boolean changed = false;
         Iterator<SkinEntry> it = skins.iterator();
         Set<String> known = new HashSet<String>();
         while (it.hasNext()) {
             SkinEntry e = it.next();
-            if (e.file == null || !onDisk.contains(e.file)) it.remove();
-            else known.add(e.file);
+            if (e.file == null || !onDisk.contains(e.file)) {
+                it.remove();
+                changed = true;
+            } else {
+                known.add(e.file);
+            }
         }
         List<String> added = new ArrayList<String>(onDisk);
         Collections.sort(added, String.CASE_INSENSITIVE_ORDER); // HashSet 순서는 매번 달라지므로 정렬
@@ -156,13 +163,73 @@ public class SkinConfig {
             if (!known.contains(file)) {
                 String name = file.substring(0, file.length() - 4);
                 skins.add(new SkinEntry(name, file, MODEL_CLASSIC, "file"));
+                changed = true;
             }
         }
         if (activeFile != null && find(activeFile) == null) {
             activeFile = null;
             enabled = false;
+            changed = true;
+        }
+        if (changed) save(); // 바뀐 게 없으면 파일을 다시 쓰지 않는다
+    }
+
+    /** 파일 이름으로 쓸 수 없는 문자 (Windows 기준) + 마인크래프트 색상 코드 */
+    private static final String BAD_CHARS = "\\/:*?\"<>|\u00a7";
+    private static final String[] RESERVED = {"CON", "PRN", "AUX", "NUL",
+            "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+            "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"};
+    public static final int MAX_NAME_LENGTH = 32;
+
+    /** 스킨 이름 검사. 문제가 있으면 오류 메시지, 없으면 null */
+    public static String checkName(String name) {
+        if (name == null || name.trim().isEmpty()) return "이름을 입력하세요.";
+        if (!name.equals(name.trim()) || name.endsWith(".")) return "이름 앞뒤에 공백이나 마침표를 쓸 수 없습니다.";
+        if (name.length() > MAX_NAME_LENGTH) return "이름은 " + MAX_NAME_LENGTH + "자 이하로 해 주세요.";
+        for (int i = 0; i < name.length(); i++) {
+            char c = name.charAt(i);
+            if (c < 32 || BAD_CHARS.indexOf(c) >= 0) return "이름에 \\ / : * ? \" < > | 는 쓸 수 없습니다.";
+        }
+        for (String r : RESERVED) if (r.equalsIgnoreCase(name)) return "그 이름은 쓸 수 없습니다.";
+        return null;
+    }
+
+    /** 스킨 이름(=파일 이름)을 바꾼다. 실패하면 오류 메시지 */
+    public String rename(SkinEntry e, String newName) {
+        String err = checkName(newName);
+        if (err != null) return err;
+        String newFile = newName + ".png";
+        if (newFile.equals(e.file)) {
+            e.name = newName;
+            save();
+            return null;
+        }
+        for (SkinEntry o : skins) {
+            if (o != e && newFile.equalsIgnoreCase(o.file)) return "같은 이름의 스킨이 이미 있습니다.";
+        }
+        File from = new File(skinsDir, e.file);
+        File to = new File(skinsDir, newFile);
+        // 대소문자만 바꾸는 경우 Windows에서는 to.exists()가 자기 자신을 가리키므로 제외
+        if (to.exists() && !newFile.equalsIgnoreCase(e.file)) return "같은 이름의 파일이 이미 있습니다.";
+        if (!from.renameTo(to)) return "이름을 바꾸지 못했습니다. (파일이 사용 중일 수 있음)";
+        if (e.file.equals(activeFile)) activeFile = newFile;
+        e.file = newFile;
+        e.name = newName;
+        save();
+        return null;
+    }
+
+    /** 스킨 파일을 지우고 목록에서 뺀다. 실패하면 오류 메시지 */
+    public String delete(SkinEntry e) {
+        File f = new File(skinsDir, e.file);
+        if (f.exists() && !f.delete()) return "파일을 지우지 못했습니다. (파일이 사용 중일 수 있음)";
+        skins.remove(e);
+        if (e.file.equals(activeFile)) {
+            activeFile = null;
+            enabled = false;
         }
         save();
+        return null;
     }
 
     public SkinEntry find(String file) {

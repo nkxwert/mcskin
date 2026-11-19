@@ -90,6 +90,27 @@ public class SelfSkinMod {
         config.save();
     }
 
+    public static void setCapeHidden(boolean hide) {
+        config.hideCape = hide;
+        config.save();
+    }
+
+    /** 스킨 이름 바꾸기. 실패 시 오류 메시지 반환. (텍스처는 그대로 쓰므로 다시 읽을 필요 없음) */
+    public static String rename(SkinConfig.SkinEntry entry, String newName) {
+        return config.rename(entry, newName);
+    }
+
+    /** 스킨 삭제 (파일도 지움). 사용 중인 스킨이면 원래 스킨으로 돌아간다. 실패 시 오류 메시지 반환. */
+    public static String delete(SkinConfig.SkinEntry entry) {
+        boolean wasActive = entry.file.equals(config.activeFile);
+        String err = config.delete(entry);
+        if (err == null && wasActive) {
+            skins.setActive(false);
+            skins.unload();
+        }
+        return err;
+    }
+
     /** 모든 부위의 갑옷 숨김 설정 */
     public static void setAllArmorHidden(boolean hide) {
         for (int slot = 0; slot < 4; slot++) config.setArmorHidden(slot, hide);
@@ -103,12 +124,11 @@ public class SelfSkinMod {
             openGuiNextTick = false;
             Minecraft.getMinecraft().displayGuiScreen(new GuiSelfSkin());
         }
-        skins.update();
     }
 
     @SubscribeEvent
     public void onRenderTick(TickEvent.RenderTickEvent event) {
-        // 프레임마다도 확인해서 원래 스킨이 한 프레임이라도 보이는 걸 막는다
+        // 그리기 직전에 한 번만 확인한다. 화면을 그리지 않을 때(창 최소화 등)는 적용할 필요도 없다.
         if (event.phase == TickEvent.Phase.START) skins.update();
     }
 

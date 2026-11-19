@@ -2,6 +2,8 @@ package dev.selfskin;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiYesNo;
+import net.minecraft.client.gui.GuiYesNoCallback;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.util.Util;
@@ -12,10 +14,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public class GuiSelfSkin extends GuiScreen {
+public class GuiSelfSkin extends GuiScreen implements GuiYesNoCallback {
 
     private static final int BTN_DONE = 0, BTN_TOGGLE = 1, BTN_MODEL = 2, BTN_FOLDER = 3,
-            BTN_REFRESH = 4, BTN_FETCH = 5, BTN_ARMOR = 6 /* 6~9: 갑옷 칸 */, BTN_HEAD_BLOCK = 12, BTN_PREV = 10, BTN_NEXT = 11, BTN_ENTRY = 100;
+            BTN_REFRESH = 4, BTN_FETCH = 5, BTN_VISIBILITY = 6, BTN_RENAME = 7, BTN_DELETE = 8,
+            BTN_PREV = 10, BTN_NEXT = 11, BTN_ENTRY = 100;
+    private static final int CONFIRM_DELETE = 1;
+
+    /** 이름 바꾸기/삭제 대상. 목록에서 누른 스킨 (적용에 실패해도 선택은 된다) */
+    private String selectedFile = SelfSkinMod.config.activeFile;
 
     private int page = 0;
     private int rows;
@@ -53,17 +60,28 @@ public class GuiSelfSkin extends GuiScreen {
             if (idx >= list.size()) break;
             SkinConfig.SkinEntry e = list.get(idx);
             boolean isActive = e.file.equals(SelfSkinMod.config.activeFile);
-            String label = (isActive ? "§a● " : "") + e.name + " §7" + (SkinConfig.MODEL_SLIM.equals(e.model) ? "[A]" : "[S]");
+            boolean isSelected = e.file.equals(selectedFile);
+            String mark = isActive ? "§a● " : isSelected ? "§e▶ " : "";
+            String label = mark + (isSelected ? "§n" : "") + e.name + "§r §7" + (SkinConfig.MODEL_SLIM.equals(e.model) ? "[A]" : "[S]");
             label = fontRendererObj.trimStringToWidth(label, listW - 10);
             buttonList.add(new GuiButton(BTN_ENTRY + idx, left, 32 + i * 22, listW, 20, label));
         }
         int pageY = 32 + rows * 22;
+        // [<] [이름] [삭제] [>]
         GuiButton prev = new GuiButton(BTN_PREV, left, pageY, 30, 20, "<");
         GuiButton next = new GuiButton(BTN_NEXT, left + listW - 30, pageY, 30, 20, ">");
         prev.enabled = page > 0;
         next.enabled = page < pages - 1;
+        int midW = (listW - 60 - 6) / 2;
+        boolean hasSelection = getSelected() != null;
+        GuiButton rename = new GuiButton(BTN_RENAME, left + 32, pageY, midW, 20, "이름");
+        GuiButton delete = new GuiButton(BTN_DELETE, left + listW - 32 - midW, pageY, midW, 20, "삭제");
+        rename.enabled = hasSelection;
+        delete.enabled = hasSelection;
         buttonList.add(prev);
         buttonList.add(next);
+        buttonList.add(rename);
+        buttonList.add(delete);
 
         SkinConfig.SkinEntry active = SelfSkinMod.config.getActive();
         GuiButton toggle = new GuiButton(BTN_TOGGLE, colX, 32, colW, 20,
@@ -78,14 +96,8 @@ public class GuiSelfSkin extends GuiScreen {
         int half = (colW - 2) / 2;
         buttonList.add(new GuiButton(BTN_FOLDER, colX, 76, half, 20, "폴더"));
         buttonList.add(new GuiButton(BTN_REFRESH, colX + colW - half, 76, half, 20, "새로고침"));
-        // 갑옷 부위별 보임/숨김 (위에서부터 투구, 흉갑, 레깅스, 부츠)
-        for (int i = 0; i < 4; i++) {
-            int slot = SkinConfig.SLOT_HELMET - i;
-            buttonList.add(new GuiButton(BTN_ARMOR + slot, colX, 98 + i * 22, colW, 20,
-                    SkinConfig.SLOT_NAMES[slot] + ": " + (SelfSkinMod.config.isArmorHidden(slot) ? "§c숨김" : "§a보임")));
-        }
-        buttonList.add(new GuiButton(BTN_HEAD_BLOCK, colX, 186, colW, 20,
-                "머리 블록: " + (SelfSkinMod.config.hideHeadBlock ? "§c숨김" : "§a보임")));
+        // 갑옷 / 머리 블록 / 망토 보임 설정은 별도 화면
+        buttonList.add(new GuiButton(BTN_VISIBILITY, colX, 98, colW, 20, "갑옷·망토..."));
 
         GuiButton fetch = new GuiButton(BTN_FETCH, left + listW + 4, height - 29, 60, 20, "가져오기");
         fetch.enabled = !fetching;
@@ -98,6 +110,7 @@ public class GuiSelfSkin extends GuiScreen {
         SkinConfig cfg = SelfSkinMod.config;
         if (b.id >= BTN_ENTRY) {
             SkinConfig.SkinEntry e = cfg.skins.get(b.id - BTN_ENTRY);
+            selectedFile = e.file;
             String err = SelfSkinMod.apply(e);
             setStatus(err == null ? "적용됨: " + e.name : err, err == null ? 0x55FF55 : 0xFF5555);
         } else if (b.id == BTN_TOGGLE) {
@@ -126,11 +139,20 @@ public class GuiSelfSkin extends GuiScreen {
             } else {
                 setStatus("스킨 " + cfg.skins.size() + "개", 0xAAAAAA);
             }
-        } else if (b.id >= BTN_ARMOR && b.id < BTN_ARMOR + 4) {
-            int slot = b.id - BTN_ARMOR;
-            SelfSkinMod.setArmorHidden(slot, !cfg.isArmorHidden(slot));
-        } else if (b.id == BTN_HEAD_BLOCK) {
-            SelfSkinMod.setHeadBlockHidden(!cfg.hideHeadBlock);
+        } else if (b.id == BTN_VISIBILITY) {
+            mc.displayGuiScreen(new GuiVisibility(this));
+            return;
+        } else if (b.id == BTN_RENAME) {
+            SkinConfig.SkinEntry e = getSelected();
+            if (e != null) mc.displayGuiScreen(new GuiRenameSkin(this, e));
+            return;
+        } else if (b.id == BTN_DELETE) {
+            SkinConfig.SkinEntry e = getSelected();
+            if (e != null) {
+                mc.displayGuiScreen(new GuiYesNo(this, "스킨 삭제",
+                        "'" + e.name + "' 스킨을 삭제할까요? png 파일도 지워집니다.", "삭제", "취소", CONFIRM_DELETE));
+            }
+            return;
         } else if (b.id == BTN_FETCH) {
             startFetch();
         } else if (b.id == BTN_PREV) {
@@ -167,6 +189,7 @@ public class GuiSelfSkin extends GuiScreen {
                         e.model = r.model;
                         e.source = "username";
                         cfg.save();
+                        selectedFile = e.file;
                         String err = SelfSkinMod.apply(e);
                         setStatus(err == null ? "적용됨: " + e.name : err, err == null ? 0x55FF55 : 0xFF5555);
                     }
@@ -182,6 +205,35 @@ public class GuiSelfSkin extends GuiScreen {
             }
         }, "SelfSkin-Fetch").start();
         dirty = true;
+    }
+
+    /** 삭제 확인 창의 결과 */
+    @Override
+    public void confirmClicked(boolean yes, int id) {
+        if (id == CONFIRM_DELETE && yes) {
+            SkinConfig.SkinEntry e = getSelected();
+            if (e != null) {
+                String err = SelfSkinMod.delete(e);
+                if (err == null) {
+                    selectedFile = SelfSkinMod.config.activeFile;
+                    setStatus("삭제됨: " + e.name, 0xAAAAAA);
+                } else {
+                    setStatus(err, 0xFF5555);
+                }
+            }
+        }
+        mc.displayGuiScreen(this);
+    }
+
+    /** 이름 바꾸기 화면에서 돌아올 때 */
+    void onRenamed(SkinConfig.SkinEntry e) {
+        selectedFile = e.file;
+        setStatus("이름 바꿈: " + e.name, 0x55FF55);
+        dirty = true;
+    }
+
+    private SkinConfig.SkinEntry getSelected() {
+        return SelfSkinMod.config.find(selectedFile);
     }
 
     private void setStatus(String s, int color) {

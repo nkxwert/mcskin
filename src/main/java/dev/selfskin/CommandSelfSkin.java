@@ -11,7 +11,8 @@ import java.util.List;
 /** /selfskin          → 메뉴 열기
  *  /selfskin on|off   → 켜기/끄기
  *  /selfskin armor [부위] [on|off] → 내 갑옷 보이기/숨기기
- *      부위: helmet, chestplate, leggings, boots, headblock (생략하면 갑옷 전체), on/off 생략 시 전환 */
+ *      부위: helmet, chestplate, leggings, boots, headblock (생략하면 갑옷 전체), on/off 생략 시 전환
+ *  /selfskin cape [on|off] → 내 망토 보이기/숨기기 */
 public class CommandSelfSkin extends CommandBase {
 
     @Override
@@ -26,7 +27,7 @@ public class CommandSelfSkin extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/selfskin [on|off] | /selfskin armor [helmet|chestplate|leggings|boots|headblock] [on|off]";
+        return "/selfskin [on|off] | /selfskin armor [helmet|chestplate|leggings|boots|headblock] [on|off] | /selfskin cape [on|off]";
     }
 
     @Override
@@ -44,6 +45,14 @@ public class CommandSelfSkin extends CommandBase {
             sender.addChatMessage(new ChatComponentText("§e[SelfSkin] 꺼짐"));
         } else if ("armor".equalsIgnoreCase(args[0])) {
             armor(sender, args);
+        } else if ("cape".equalsIgnoreCase(args[0])) {
+            // on = 보이기, off = 숨기기, 생략 = 전환
+            boolean hide;
+            if (args.length >= 2 && "on".equalsIgnoreCase(args[1])) hide = false;
+            else if (args.length >= 2 && "off".equalsIgnoreCase(args[1])) hide = true;
+            else hide = !SelfSkinMod.config.hideCape;
+            SelfSkinMod.setCapeHidden(hide);
+            sender.addChatMessage(new ChatComponentText("§e[SelfSkin] 망토: " + (hide ? "§c숨김" : "§a보임")));
         } else {
             sender.addChatMessage(new ChatComponentText("§7" + getCommandUsage(sender)));
         }
@@ -106,7 +115,8 @@ public class CommandSelfSkin extends CommandBase {
 
     @Override
     public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
-        if (args.length == 1) return getListOfStringsMatchingLastWord(args, "on", "off", "armor");
+        if (args.length == 1) return getListOfStringsMatchingLastWord(args, "on", "off", "armor", "cape");
+        if (args.length == 2 && "cape".equalsIgnoreCase(args[0])) return getListOfStringsMatchingLastWord(args, "on", "off");
         if (args.length == 2 && "armor".equalsIgnoreCase(args[0])) {
             return getListOfStringsMatchingLastWord(args, "helmet", "chestplate", "leggings", "boots", "headblock", "on", "off");
         }
