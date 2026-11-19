@@ -1,0 +1,146 @@
+package dev.selfskin;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.client.renderer.ImageBufferDownload;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.util.ResourceLocation;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
+/**
+ * 내 NetworkPlayerInfo의 스킨 필드만 바꿔치기한다.
+ * 3인칭 모델, 1인칭 팔, 인벤토리 미리보기, 탭 리스트가 모두 이 값을 읽는다.
+ * 서버로는 아무것도 보내지 않으므로 다른 사람에게는 원래 스킨이 보인다.
+ */
+public class SkinManager {
+
+    private final Minecraft mc = Minecraft.getMinecraft();
+
+    private final Field fSkin;    // ResourceLocation locationSkin
+    private final Field fType;    // String skinType ("default" / "slim")
+    private final Field fLoaded;  // boolean playerTexturesLoaded
+
+    private ResourceLocation customTexture;
+    private String customModel = SkinConfig.MODEL_CLASSIC;
+    private boolean active;
+    private NetworkPlayerInfo appliedTo;
+
+    public SkinManager() {
+        // 개발 환경(MCP 이름) → 실제 실행(SRG 이름) → 타입으로 찾기 순서로 시도
+        fSkin = findField(NetworkPlayerInfo.class, ResourceLocation.class, 0, "locationSkin", "field_178865_e");
+        fType = findField(NetworkPlayerInfo.class, String.class, 0, "skinType", "field_178863_g");
+        fLoaded = findField(NetworkPlayerInfo.class, boolean.class, 0, "playerTexturesLoaded", "field_178864_d");
+    }
+
+    /** png를 읽어 텍스처로 등록한다. 메인 스레드에서 호출해야 한다. */
+    public String load(File png, String model) {
+        BufferedImage img;
+        try {
+            img = ImageIO.read(png);
+        } catch (Exception e) {
+            return "이미지를 읽을 수 없습니다: " + e.getMessage();
+        }
+        if (img == null) return "PNG 파일이 아닙니다.";
+        if (img.getWidth() != 64 || (img.getHeight() != 64 && img.getHeight() != 32)) {
+            return "스킨 크기는 64x64 또는 64x32여야 합니다. (현재 " + img.getWidth() + "x" + img.getHeight() + ")";
+        }
+        // 바닐라와 같은 처리: 64x32 구형 스킨 변환 + 투명 영역 정리
+        img = new ImageBufferDownload().parseUserSkin(img);
+
+        releaseTexture();
+        customTexture = mc.getTextureManager().getDynamicTextureLocation("selfskin", new DynamicTexture(img));
+        customModel = SkinConfig.MODEL_SLIM.equals(model) ? SkinConfig.MODEL_SLIM : SkinConfig.MODEL_CLASSIC;
+        return null;
+    }
+
+    public void setModel(String model) {
+        customModel = SkinConfig.MODEL_SLIM.equals(model) ? SkinConfig.MODEL_SLIM : SkinConfig.MODEL_CLASSIC;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+        if (!active) restore();
+    }
+
+    public boolean hasTexture() {
+        return customTexture != null;
+    }
+
+    public void unload() {
+        restore();
+        releaseTexture();
+    }
+
+    /** 매 틱/프레임 호출. 바닐라가 원래 스킨을 늦게 받아와 덮어써도 다시 적용된다. */
+    public void update() {
+        if (!active || customTexture == null) {
+            if (appliedTo != null) restore();
+            return;
+        }
+        NetworkPlayerInfo info = findSelf();
+        if (info == null) return;
+        if (appliedTo != null && appliedTo != info) restore(); // 서버/로비 이동으로 객체가 바뀐 경우
+        try {
+            if (fSkin.get(info) != customTexture) fSkin.set(info, customTexture);
+            if (!customModel.equals(fType.get(info))) fType.set(info, customModel);
+            appliedTo = info;
+        } catch (IllegalAccessException e) {
+            SelfSkinMod.LOG.error("스킨 적용 실패", e);
+        }
+    }
+
+    /** 원래 스킨으로 되돌린다: 필드를 비우면 바닐라가 Mojang 스킨을 다시 불러온다. */
+    private void restore() {
+        NetworkPlayerInfo info = appliedTo;
+        appliedTo = null;
+        if (info == null) return;
+        try {
+            fSkin.set(info, null);
+            fType.set(info, null);
+            fLoaded.setBoolean(info, false);
+        } catch (IllegalAccessException e) {
+            SelfSkinMod.LOG.error("스킨 복구 실패", e);
+        }
+    }
+
+    private void releaseTexture() {
+        if (customTexture != null) {
+            mc.getTextureManager().deleteTexture(customTexture);
+            customTexture = null;
+        }
+    }
+
+    private NetworkPlayerInfo findSelf() {
+        if (mc.thePlayer == null || mc.getNetHandler() == null) return null;
+        return mc.getNetHandler().getPlayerInfo(mc.thePlayer.getUniqueID());
+    }
+
+    private static Field findField(Class<?> owner, Class<?> type, int index, String... names) {
+        for (String name : names) {
+            try {
+                Field f = owner.getDeclaredField(name);
+                if (f.getType() == type) {
+                    f.setAccessible(true);
+                    return f;
+                }
+            } catch (NoSuchFieldException ignored) {
+            }
+        }
+        // 클라이언트가 이름을 다르게 매핑한 경우 대비: 같은 타입의 index번째 필드
+        int i = 0;
+        for (Field f : owner.getDeclaredFields()) {
+            if (f.getType() == type && !Modifier.isStatic(f.getModifiers())) {
+                if (i++ == index) {
+                    f.setAccessible(true);
+                    return f;
+                }
+            }
+        }
+        throw new IllegalStateException("NetworkPlayerInfo 필드를 찾지 못함: " + names[0]);
+    }
+}

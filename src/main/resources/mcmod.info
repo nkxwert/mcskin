@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "${modid}",
+    "name": "Self Skin",
+    "description": "나에게만 보이는 스킨. 서버로 아무것도 보내지 않는 클라이언트 전용 외형 모드.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": ["You"],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
