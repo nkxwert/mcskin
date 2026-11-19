@@ -34,16 +34,16 @@ public final class SkinFetcher {
     }
 
     public static Result fetch(String username, File skinsDir) throws Exception {
-        if (!isValidName(username)) throw new IllegalArgumentException("닉네임 형식이 올바르지 않습니다.");
+        if (!isValidName(username)) throw new IllegalArgumentException(L.t("error.badUsername"));
 
         String profileJson = get("https://api.mojang.com/users/profiles/minecraft/" + username);
-        if (profileJson == null || profileJson.trim().isEmpty()) throw new IllegalStateException("존재하지 않는 닉네임입니다.");
+        if (profileJson == null || profileJson.trim().isEmpty()) throw new IllegalStateException(L.t("error.noPlayer"));
         JsonObject profile = new JsonParser().parse(profileJson).getAsJsonObject();
         String uuid = profile.get("id").getAsString();
         String exactName = profile.get("name").getAsString();
 
         String sessionJson = get("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid);
-        if (sessionJson == null) throw new IllegalStateException("프로필을 불러오지 못했습니다.");
+        if (sessionJson == null) throw new IllegalStateException(L.t("error.profileFailed"));
         JsonArray props = new JsonParser().parse(sessionJson).getAsJsonObject().getAsJsonArray("properties");
 
         String texturesB64 = null;
@@ -51,11 +51,11 @@ public final class SkinFetcher {
             JsonObject o = p.getAsJsonObject();
             if ("textures".equals(o.get("name").getAsString())) texturesB64 = o.get("value").getAsString();
         }
-        if (texturesB64 == null) throw new IllegalStateException("스킨 정보가 없습니다.");
+        if (texturesB64 == null) throw new IllegalStateException(L.t("error.noTextures"));
 
         String decoded = new String(Base64.getDecoder().decode(texturesB64), StandardCharsets.UTF_8);
         JsonObject textures = new JsonParser().parse(decoded).getAsJsonObject().getAsJsonObject("textures");
-        if (textures == null || !textures.has("SKIN")) throw new IllegalStateException("기본 스킨을 쓰는 계정입니다.");
+        if (textures == null || !textures.has("SKIN")) throw new IllegalStateException(L.t("error.defaultSkin"));
         JsonObject skin = textures.getAsJsonObject("SKIN");
         String url = skin.get("url").getAsString();
         if (url.startsWith("http://textures.minecraft.net/")) url = "https://" + url.substring("http://".length());

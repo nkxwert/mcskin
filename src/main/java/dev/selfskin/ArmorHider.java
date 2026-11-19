@@ -63,7 +63,7 @@ public final class ArmorHider {
         try {
             fLayers = SkinManager.findField(RendererLivingEntity.class, List.class, 0, "layerRenderers", "field_177097_h");
         } catch (IllegalStateException e) {
-            SelfSkinMod.LOG.error("갑옷 숨기기 설치 실패", e);
+            SelfSkinMod.LOG.error("Failed to install armor hiding", e);
             return;
         }
         int armor = 0, head = 0, cape = 0;
@@ -84,12 +84,12 @@ public final class ArmorHider {
                     }
                 }
             } catch (Exception e) {
-                SelfSkinMod.LOG.error("갑옷 숨기기 설치 실패", e);
+                SelfSkinMod.LOG.error("Failed to install armor hiding", e);
             }
         }
-        if (armor == 0) SelfSkinMod.LOG.warn("갑옷 레이어를 찾지 못했습니다. 갑옷 숨기기가 동작하지 않습니다.");
-        if (head == 0) SelfSkinMod.LOG.warn("머리 블록 레이어를 찾지 못했습니다. 머리 블록 숨기기가 동작하지 않습니다.");
-        if (cape == 0) SelfSkinMod.LOG.warn("망토 레이어를 찾지 못했습니다. 망토 숨기기가 동작하지 않습니다.");
+        if (armor == 0) SelfSkinMod.LOG.warn("Armor layer not found; armor hiding will not work.");
+        if (head == 0) SelfSkinMod.LOG.warn("Head block layer not found; head block hiding will not work.");
+        if (cape == 0) SelfSkinMod.LOG.warn("Cape layer not found; cape hiding will not work.");
     }
 
     private static final class HiddenForSelf implements LayerRenderer<EntityLivingBase> {

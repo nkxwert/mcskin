@@ -2,7 +2,7 @@
   {
     "modid": "${modid}",
     "name": "Self Skin",
-    "description": "나에게만 보이는 스킨. 서버로 아무것도 보내지 않는 클라이언트 전용 외형 모드.",
+    "description": "A skin only you can see. Client-side only: nothing is sent to the server, so other players still see your real skin. Also hides your own armor, head block and cape (only for you).\n\n나에게만 보이는 스킨. 서버로 아무것도 보내지 않는 클라이언트 전용 외형 모드.",
     "version": "${version}",
     "mcversion": "${mcversion}",
     "url": "",

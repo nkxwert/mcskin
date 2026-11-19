@@ -34,7 +34,7 @@ public class SelfSkinMod {
         config = SkinConfig.load(mc.mcDataDir);
         skins = new SkinManager();
 
-        openKey = new KeyBinding("Self Skin 메뉴 열기", Keyboard.KEY_K, "Self Skin");
+        openKey = new KeyBinding("key.selfskin.open", Keyboard.KEY_K, "key.categories.selfskin");
         ClientRegistry.registerKeyBinding(openKey);
         ClientCommandHandler.instance.registerCommand(new CommandSelfSkin());
         MinecraftForge.EVENT_BUS.register(this);
@@ -45,7 +45,7 @@ public class SelfSkinMod {
         if (active != null) {
             String err = skins.load(new File(SkinConfig.getSkinsDir(), active.file), active.model);
             if (err != null) {
-                LOG.warn("저장된 스킨 로드 실패: " + err);
+                LOG.warn("Failed to load saved skin: " + err);
                 config.enabled = false;
                 config.save();
             }
@@ -68,7 +68,7 @@ public class SelfSkinMod {
     public static String setEnabled(boolean on) {
         SkinConfig.SkinEntry active = config.getActive();
         if (on && active == null) {
-            return "먼저 메뉴에서 스킨을 선택하세요.";
+            return L.t("error.noSkin");
         }
         if (on && !skins.hasTexture()) {
             return apply(active);

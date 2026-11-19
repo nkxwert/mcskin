@@ -1,0 +1,81 @@
+# Self Skin - English
+key.selfskin.open=Open Self Skin menu
+key.categories.selfskin=Self Skin
+
+selfskin.state.on=§aOn
+selfskin.state.off=§cOff
+selfskin.state.hidden=§cHidden
+selfskin.state.shown=§aShown
+selfskin.slot.0=Boots
+selfskin.slot.1=Leggings
+selfskin.slot.2=Chestplate
+selfskin.slot.3=Helmet
+selfskin.headBlock=Head block
+selfskin.cape=Cape
+
+selfskin.gui.title=Self Skin §7— a skin only you can see
+selfskin.gui.rename=Rename
+selfskin.gui.delete=Delete
+selfskin.gui.apply=Skin: %s
+selfskin.gui.model=Model: %s
+selfskin.gui.folder=Folder
+selfskin.gui.refresh=Refresh
+selfskin.gui.visibility=Armor/Cape...
+selfskin.gui.fetch=Fetch
+selfskin.gui.fetchLabel=Fetch by username
+selfskin.gui.done=Done
+selfskin.gui.ok=OK
+selfskin.gui.cancel=Cancel
+selfskin.gui.preview1=§7Join a world to
+selfskin.gui.preview2=§7see the preview
+selfskin.gui.empty1=§7No skins yet.
+selfskin.gui.empty2=§7Put a png in the folder
+selfskin.gui.empty3=§7or fetch by username.
+
+selfskin.status.applied=Applied: %s
+selfskin.status.count=%s skins
+selfskin.status.badUsername=Usernames are 1-16 letters, digits or _
+selfskin.status.fetching=Loading %s's skin...
+selfskin.status.saveFailed=Could not save the skin
+selfskin.status.failed=Failed: %s
+selfskin.status.deleted=Deleted: %s
+selfskin.status.renamed=Renamed: %s
+
+selfskin.delete.title=Delete skin
+selfskin.delete.question=Delete '%s'? Its png file will be deleted too.
+
+selfskin.rename.title=Rename skin
+selfskin.rename.hint=§7The png file is renamed too
+
+selfskin.vis.title=Armor & cape §7— only you see this
+selfskin.vis.line=%s: %s
+selfskin.vis.showAll=Show all
+selfskin.vis.hideAll=Hide all
+selfskin.vis.back=Back
+
+selfskin.cmd.on=§a[SelfSkin] On
+selfskin.cmd.off=§e[SelfSkin] Off
+selfskin.cmd.error=§c[SelfSkin] %s
+selfskin.cmd.line=§e[SelfSkin] %s: %s
+selfskin.cmd.unknownPart=§c[SelfSkin] Unknown part: %s §7(helmet, chestplate, leggings, boots, headblock)
+selfskin.cmd.allHidden=§e[SelfSkin] All armor hidden
+selfskin.cmd.allShown=§a[SelfSkin] All armor shown
+
+selfskin.error.noSkin=Select a skin in the menu first.
+selfskin.error.nameEmpty=Enter a name.
+selfskin.error.nameEdges=Names can't start or end with a space or end with a period.
+selfskin.error.nameTooLong=Names can be at most %s characters.
+selfskin.error.nameBadChars=Names can't contain \ / : * ? " < > |
+selfskin.error.nameReserved=That name can't be used.
+selfskin.error.nameDuplicate=A skin with that name already exists.
+selfskin.error.fileExists=A file with that name already exists.
+selfskin.error.renameFailed=Couldn't rename the file (it may be in use).
+selfskin.error.deleteFailed=Couldn't delete the file (it may be in use).
+selfskin.error.badUsername=Invalid username.
+selfskin.error.noPlayer=No player with that username.
+selfskin.error.profileFailed=Couldn't load the profile.
+selfskin.error.noTextures=No skin information.
+selfskin.error.defaultSkin=This account uses a default skin.
+selfskin.error.unreadable=Can't read the image: %s
+selfskin.error.notPng=Not a PNG file.
+selfskin.error.badSize=Skins must be 64x64 or 64x32 (this one is %sx%s).

@@ -1,0 +1,81 @@
+# Self Skin - 한국어
+key.selfskin.open=Self Skin 메뉴 열기
+key.categories.selfskin=Self Skin
+
+selfskin.state.on=§a켜짐
+selfskin.state.off=§c꺼짐
+selfskin.state.hidden=§c숨김
+selfskin.state.shown=§a보임
+selfskin.slot.0=부츠
+selfskin.slot.1=레깅스
+selfskin.slot.2=흉갑
+selfskin.slot.3=투구
+selfskin.headBlock=머리 블록
+selfskin.cape=망토
+
+selfskin.gui.title=Self Skin §7— 나에게만 보이는 스킨
+selfskin.gui.rename=이름
+selfskin.gui.delete=삭제
+selfskin.gui.apply=적용: %s
+selfskin.gui.model=체형: %s
+selfskin.gui.folder=폴더
+selfskin.gui.refresh=새로고침
+selfskin.gui.visibility=갑옷·망토...
+selfskin.gui.fetch=가져오기
+selfskin.gui.fetchLabel=닉네임으로 가져오기
+selfskin.gui.done=완료
+selfskin.gui.ok=확인
+selfskin.gui.cancel=취소
+selfskin.gui.preview1=§7월드에 들어가면
+selfskin.gui.preview2=§7미리보기가 보입니다
+selfskin.gui.empty1=§7스킨이 없습니다.
+selfskin.gui.empty2=§7폴더에 png를 넣거나
+selfskin.gui.empty3=§7닉네임으로 가져오세요.
+
+selfskin.status.applied=적용됨: %s
+selfskin.status.count=스킨 %s개
+selfskin.status.badUsername=닉네임은 영문/숫자/_ 1~16자
+selfskin.status.fetching=%s 스킨 불러오는 중...
+selfskin.status.saveFailed=저장 실패
+selfskin.status.failed=실패: %s
+selfskin.status.deleted=삭제됨: %s
+selfskin.status.renamed=이름 바꿈: %s
+
+selfskin.delete.title=스킨 삭제
+selfskin.delete.question='%s' 스킨을 삭제할까요? png 파일도 지워집니다.
+
+selfskin.rename.title=스킨 이름 바꾸기
+selfskin.rename.hint=§7png 파일 이름도 함께 바뀝니다
+
+selfskin.vis.title=갑옷·망토 보임 설정 §7— 나에게만 적용
+selfskin.vis.line=%s: %s
+selfskin.vis.showAll=모두 보이기
+selfskin.vis.hideAll=모두 숨기기
+selfskin.vis.back=돌아가기
+
+selfskin.cmd.on=§a[SelfSkin] 켜짐
+selfskin.cmd.off=§e[SelfSkin] 꺼짐
+selfskin.cmd.error=§c[SelfSkin] %s
+selfskin.cmd.line=§e[SelfSkin] %s: %s
+selfskin.cmd.unknownPart=§c[SelfSkin] 알 수 없는 부위: %s §7(helmet, chestplate, leggings, boots, headblock)
+selfskin.cmd.allHidden=§e[SelfSkin] 갑옷 전체 숨김
+selfskin.cmd.allShown=§a[SelfSkin] 갑옷 전체 보임
+
+selfskin.error.noSkin=먼저 메뉴에서 스킨을 선택하세요.
+selfskin.error.nameEmpty=이름을 입력하세요.
+selfskin.error.nameEdges=이름 앞뒤에 공백이나 마침표를 쓸 수 없습니다.
+selfskin.error.nameTooLong=이름은 %s자 이하로 해 주세요.
+selfskin.error.nameBadChars=이름에 \ / : * ? " < > | 는 쓸 수 없습니다.
+selfskin.error.nameReserved=그 이름은 쓸 수 없습니다.
+selfskin.error.nameDuplicate=같은 이름의 스킨이 이미 있습니다.
+selfskin.error.fileExists=같은 이름의 파일이 이미 있습니다.
+selfskin.error.renameFailed=이름을 바꾸지 못했습니다. (파일이 사용 중일 수 있음)
+selfskin.error.deleteFailed=파일을 지우지 못했습니다. (파일이 사용 중일 수 있음)
+selfskin.error.badUsername=닉네임 형식이 올바르지 않습니다.
+selfskin.error.noPlayer=존재하지 않는 닉네임입니다.
+selfskin.error.profileFailed=프로필을 불러오지 못했습니다.
+selfskin.error.noTextures=스킨 정보가 없습니다.
+selfskin.error.defaultSkin=기본 스킨을 쓰는 계정입니다.
+selfskin.error.unreadable=이미지를 읽을 수 없습니다: %s
+selfskin.error.notPng=PNG 파일이 아닙니다.
+selfskin.error.badSize=스킨 크기는 64x64 또는 64x32여야 합니다. (현재 %sx%s)

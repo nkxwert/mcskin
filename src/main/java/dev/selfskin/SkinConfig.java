@@ -63,7 +63,6 @@ public class SkinConfig {
 
     /** 갑옷 칸 번호 (InventoryPlayer.armorInventory 순서) */
     public static final int SLOT_BOOTS = 0, SLOT_LEGGINGS = 1, SLOT_CHESTPLATE = 2, SLOT_HELMET = 3;
-    public static final String[] SLOT_NAMES = {"부츠", "레깅스", "흉갑", "투구"};
 
     public boolean isArmorHidden(int slot) {
         switch (slot) {
@@ -107,7 +106,7 @@ public class SkinConfig {
             try (Reader r = new InputStreamReader(new FileInputStream(configFile), StandardCharsets.UTF_8)) {
                 cfg = GSON.fromJson(r, SkinConfig.class);
             } catch (Exception e) {
-                SelfSkinMod.LOG.warn("selfskin.json 읽기 실패, 기본값 사용", e);
+                SelfSkinMod.LOG.warn("Failed to read selfskin.json, using defaults", e);
             }
         }
         if (cfg == null) cfg = new SkinConfig();
@@ -128,7 +127,7 @@ public class SkinConfig {
                 GSON.toJson(this, w);
             }
         } catch (Exception e) {
-            SelfSkinMod.LOG.warn("selfskin.json 저장 실패", e);
+            SelfSkinMod.LOG.warn("Failed to save selfskin.json", e);
         }
     }
 
@@ -183,14 +182,14 @@ public class SkinConfig {
 
     /** 스킨 이름 검사. 문제가 있으면 오류 메시지, 없으면 null */
     public static String checkName(String name) {
-        if (name == null || name.trim().isEmpty()) return "이름을 입력하세요.";
-        if (!name.equals(name.trim()) || name.endsWith(".")) return "이름 앞뒤에 공백이나 마침표를 쓸 수 없습니다.";
-        if (name.length() > MAX_NAME_LENGTH) return "이름은 " + MAX_NAME_LENGTH + "자 이하로 해 주세요.";
+        if (name == null || name.trim().isEmpty()) return L.t("error.nameEmpty");
+        if (!name.equals(name.trim()) || name.endsWith(".")) return L.t("error.nameEdges");
+        if (name.length() > MAX_NAME_LENGTH) return L.t("error.nameTooLong", MAX_NAME_LENGTH);
         for (int i = 0; i < name.length(); i++) {
             char c = name.charAt(i);
-            if (c < 32 || BAD_CHARS.indexOf(c) >= 0) return "이름에 \\ / : * ? \" < > | 는 쓸 수 없습니다.";
+            if (c < 32 || BAD_CHARS.indexOf(c) >= 0) return L.t("error.nameBadChars");
         }
-        for (String r : RESERVED) if (r.equalsIgnoreCase(name)) return "그 이름은 쓸 수 없습니다.";
+        for (String r : RESERVED) if (r.equalsIgnoreCase(name)) return L.t("error.nameReserved");
         return null;
     }
 
@@ -205,13 +204,13 @@ public class SkinConfig {
             return null;
         }
         for (SkinEntry o : skins) {
-            if (o != e && newFile.equalsIgnoreCase(o.file)) return "같은 이름의 스킨이 이미 있습니다.";
+            if (o != e && newFile.equalsIgnoreCase(o.file)) return L.t("error.nameDuplicate");
         }
         File from = new File(skinsDir, e.file);
         File to = new File(skinsDir, newFile);
         // 대소문자만 바꾸는 경우 Windows에서는 to.exists()가 자기 자신을 가리키므로 제외
-        if (to.exists() && !newFile.equalsIgnoreCase(e.file)) return "같은 이름의 파일이 이미 있습니다.";
-        if (!from.renameTo(to)) return "이름을 바꾸지 못했습니다. (파일이 사용 중일 수 있음)";
+        if (to.exists() && !newFile.equalsIgnoreCase(e.file)) return L.t("error.fileExists");
+        if (!from.renameTo(to)) return L.t("error.renameFailed");
         if (e.file.equals(activeFile)) activeFile = newFile;
         e.file = newFile;
         e.name = newName;
@@ -222,7 +221,7 @@ public class SkinConfig {
     /** 스킨 파일을 지우고 목록에서 뺀다. 실패하면 오류 메시지 */
     public String delete(SkinEntry e) {
         File f = new File(skinsDir, e.file);
-        if (f.exists() && !f.delete()) return "파일을 지우지 못했습니다. (파일이 사용 중일 수 있음)";
+        if (f.exists() && !f.delete()) return L.t("error.deleteFailed");
         skins.remove(e);
         if (e.file.equals(activeFile)) {
             activeFile = null;

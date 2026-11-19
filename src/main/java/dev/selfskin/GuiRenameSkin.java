@@ -31,8 +31,8 @@ public class GuiRenameSkin extends GuiScreen {
         field.setText(old);
         field.setFocused(true);
         buttonList.clear();
-        buttonList.add(new GuiButton(BTN_OK, width / 2 - 100, height / 2 + 12, 98, 20, "확인"));
-        buttonList.add(new GuiButton(BTN_CANCEL, width / 2 + 2, height / 2 + 12, 98, 20, "취소"));
+        buttonList.add(new GuiButton(BTN_OK, width / 2 - 100, height / 2 + 12, 98, 20, L.t("gui.ok")));
+        buttonList.add(new GuiButton(BTN_CANCEL, width / 2 + 2, height / 2 + 12, 98, 20, L.t("gui.cancel")));
     }
 
     @Override
@@ -54,8 +54,8 @@ public class GuiRenameSkin extends GuiScreen {
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         drawDefaultBackground();
-        drawCenteredString(fontRendererObj, "스킨 이름 바꾸기", width / 2, height / 2 - 52, 0xFFFFFF);
-        drawCenteredString(fontRendererObj, "§7png 파일 이름도 함께 바뀝니다", width / 2, height / 2 - 38, 0xFFFFFF);
+        drawCenteredString(fontRendererObj, L.t("rename.title"), width / 2, height / 2 - 52, 0xFFFFFF);
+        drawCenteredString(fontRendererObj, L.t("rename.hint"), width / 2, height / 2 - 38, 0xFFFFFF);
         field.drawTextBox();
         if (!error.isEmpty()) drawCenteredString(fontRendererObj, error, width / 2, height / 2 + 40, 0xFF5555);
         super.drawScreen(mouseX, mouseY, partialTicks);

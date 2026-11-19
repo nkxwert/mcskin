@@ -50,11 +50,11 @@ public class SkinManager {
         try {
             img = ImageIO.read(png);
         } catch (Exception e) {
-            return "이미지를 읽을 수 없습니다: " + e.getMessage();
+            return L.t("error.unreadable", e.getMessage());
         }
-        if (img == null) return "PNG 파일이 아닙니다.";
+        if (img == null) return L.t("error.notPng");
         if (img.getWidth() != 64 || (img.getHeight() != 64 && img.getHeight() != 32)) {
-            return "스킨 크기는 64x64 또는 64x32여야 합니다. (현재 " + img.getWidth() + "x" + img.getHeight() + ")";
+            return L.t("error.badSize", img.getWidth(), img.getHeight());
         }
         // 바닐라와 같은 처리: 64x32 구형 스킨 변환 + 투명 영역 정리
         img = new ImageBufferDownload().parseUserSkin(img);
@@ -126,7 +126,7 @@ public class SkinManager {
             if (fSkin.get(info) != TEXTURE) fSkin.set(info, TEXTURE);
             if (fType.get(info) != customModel) fType.set(info, customModel); // customModel은 상수 문자열
         } catch (IllegalAccessException e) {
-            SelfSkinMod.LOG.error("스킨 적용 실패", e);
+            SelfSkinMod.LOG.error("Failed to apply skin", e);
         }
     }
 
@@ -144,7 +144,7 @@ public class SkinManager {
             fType.set(info, null);
             fLoaded.setBoolean(info, false);
         } catch (IllegalAccessException e) {
-            SelfSkinMod.LOG.error("스킨 복구 실패", e);
+            SelfSkinMod.LOG.error("Failed to restore skin", e);
         }
     }
 
@@ -169,6 +169,6 @@ public class SkinManager {
                 }
             }
         }
-        throw new IllegalStateException(owner.getSimpleName() + " 필드를 찾지 못함: " + names[0]);
+        throw new IllegalStateException(owner.getSimpleName() + " field not found: " + names[0]);
     }
 }

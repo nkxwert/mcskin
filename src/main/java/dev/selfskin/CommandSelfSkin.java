@@ -39,10 +39,10 @@ public class CommandSelfSkin extends CommandBase {
         if ("on".equalsIgnoreCase(args[0])) {
             String err = SelfSkinMod.setEnabled(true);
             sender.addChatMessage(new ChatComponentText(err == null
-                    ? "§a[SelfSkin] 켜짐" : "§c[SelfSkin] " + err));
+                    ? L.t("cmd.on") : L.t("cmd.error", err)));
         } else if ("off".equalsIgnoreCase(args[0])) {
             SelfSkinMod.setEnabled(false);
-            sender.addChatMessage(new ChatComponentText("§e[SelfSkin] 꺼짐"));
+            sender.addChatMessage(new ChatComponentText(L.t("cmd.off")));
         } else if ("armor".equalsIgnoreCase(args[0])) {
             armor(sender, args);
         } else if ("cape".equalsIgnoreCase(args[0])) {
@@ -52,7 +52,7 @@ public class CommandSelfSkin extends CommandBase {
             else if (args.length >= 2 && "off".equalsIgnoreCase(args[1])) hide = true;
             else hide = !SelfSkinMod.config.hideCape;
             SelfSkinMod.setCapeHidden(hide);
-            sender.addChatMessage(new ChatComponentText("§e[SelfSkin] 망토: " + (hide ? "§c숨김" : "§a보임")));
+            sender.addChatMessage(new ChatComponentText(L.t("cmd.line", L.t("cape"), L.hidden(hide))));
         } else {
             sender.addChatMessage(new ChatComponentText("§7" + getCommandUsage(sender)));
         }
@@ -76,8 +76,7 @@ public class CommandSelfSkin extends CommandBase {
             if ("on".equalsIgnoreCase(args[next])) hide = false;
             else if ("off".equalsIgnoreCase(args[next])) hide = true;
             else {
-                sender.addChatMessage(new ChatComponentText("§c[SelfSkin] 알 수 없는 부위: " + args[next]
-                        + " §7(helmet, chestplate, leggings, boots, headblock)"));
+                sender.addChatMessage(new ChatComponentText(L.t("cmd.unknownPart", args[next])));
                 return;
             }
         }
@@ -85,17 +84,16 @@ public class CommandSelfSkin extends CommandBase {
         if (slot == HEAD_BLOCK) {
             boolean h = hide != null ? hide : !cfg.hideHeadBlock;
             SelfSkinMod.setHeadBlockHidden(h);
-            sender.addChatMessage(new ChatComponentText("§e[SelfSkin] 머리 블록: " + (h ? "§c숨김" : "§a보임")));
+            sender.addChatMessage(new ChatComponentText(L.t("cmd.line", L.t("headBlock"), L.hidden(h))));
         } else if (slot >= 0) {
             boolean h = hide != null ? hide : !cfg.isArmorHidden(slot);
             SelfSkinMod.setArmorHidden(slot, h);
-            sender.addChatMessage(new ChatComponentText("§e[SelfSkin] " + SkinConfig.SLOT_NAMES[slot] + ": "
-                    + (h ? "§c숨김" : "§a보임")));
+            sender.addChatMessage(new ChatComponentText(L.t("cmd.line", L.slot(slot), L.hidden(h))));
         } else {
             // 전체 전환: 하나라도 보이면 모두 숨기고, 모두 숨겨져 있으면 모두 보이게
             boolean h = hide != null ? hide : !cfg.isAllArmorHidden();
             SelfSkinMod.setAllArmorHidden(h);
-            sender.addChatMessage(new ChatComponentText(h ? "§e[SelfSkin] 갑옷 전체 숨김" : "§a[SelfSkin] 갑옷 전체 보임"));
+            sender.addChatMessage(new ChatComponentText(L.t(h ? "cmd.allHidden" : "cmd.allShown")));
         }
     }
 

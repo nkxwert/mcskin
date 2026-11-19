@@ -35,20 +35,16 @@ public class GuiVisibility extends GuiScreen {
         for (int i = 0; i < 4; i++) {
             int slot = SkinConfig.SLOT_HELMET - i;
             buttonList.add(new GuiButton(BTN_ARMOR + slot, colX, y, 150, 20,
-                    SkinConfig.SLOT_NAMES[slot] + ": " + label(cfg.isArmorHidden(slot))));
+                    L.t("vis.line", L.slot(slot), L.hidden(cfg.isArmorHidden(slot)))));
             y += 22;
         }
-        buttonList.add(new GuiButton(BTN_HEAD_BLOCK, colX, y, 150, 20, "머리 블록: " + label(cfg.hideHeadBlock)));
+        buttonList.add(new GuiButton(BTN_HEAD_BLOCK, colX, y, 150, 20, L.t("vis.line", L.t("headBlock"), L.hidden(cfg.hideHeadBlock))));
         y += 22;
-        buttonList.add(new GuiButton(BTN_CAPE, colX, y, 150, 20, "망토: " + label(cfg.hideCape)));
+        buttonList.add(new GuiButton(BTN_CAPE, colX, y, 150, 20, L.t("vis.line", L.t("cape"), L.hidden(cfg.hideCape))));
         y += 28;
-        buttonList.add(new GuiButton(BTN_SHOW_ALL, colX, y, 74, 20, "모두 보이기"));
-        buttonList.add(new GuiButton(BTN_HIDE_ALL, colX + 76, y, 74, 20, "모두 숨기기"));
-        buttonList.add(new GuiButton(BTN_BACK, width / 2 - 100, height - 29, 200, 20, "돌아가기"));
-    }
-
-    private static String label(boolean hidden) {
-        return hidden ? "§c숨김" : "§a보임";
+        buttonList.add(new GuiButton(BTN_SHOW_ALL, colX, y, 74, 20, L.t("vis.showAll")));
+        buttonList.add(new GuiButton(BTN_HIDE_ALL, colX + 76, y, 74, 20, L.t("vis.hideAll")));
+        buttonList.add(new GuiButton(BTN_BACK, width / 2 - 100, height - 29, 200, 20, L.t("vis.back")));
     }
 
     @Override
@@ -77,14 +73,14 @@ public class GuiVisibility extends GuiScreen {
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         drawDefaultBackground();
-        drawCenteredString(fontRendererObj, "갑옷·망토 보임 설정 §7— 나에게만 적용", width / 2, 12, 0xFFFFFF);
+        drawCenteredString(fontRendererObj, L.t("vis.title"), width / 2, 12, 0xFFFFFF);
         if (mc.thePlayer != null) {
             int footY = 36 + 150;
             GuiInventory.drawEntityOnScreen(previewX, footY, 60,
                     previewX - mouseX, footY - 100 - mouseY, mc.thePlayer);
         } else {
-            drawCenteredString(fontRendererObj, "§7월드에 들어가면", previewX, 90, 0xFFFFFF);
-            drawCenteredString(fontRendererObj, "§7미리보기가 보입니다", previewX, 102, 0xFFFFFF);
+            drawCenteredString(fontRendererObj, L.t("gui.preview1"), previewX, 90, 0xFFFFFF);
+            drawCenteredString(fontRendererObj, L.t("gui.preview2"), previewX, 102, 0xFFFFFF);
         }
         super.drawScreen(mouseX, mouseY, partialTicks);
     }

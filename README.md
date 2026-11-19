@@ -40,6 +40,11 @@ JDK 17을 설치한 뒤:
 
 설정 파일: `.minecraft/config/selfskin.json`
 
+### 언어 / Language
+메뉴와 메시지는 게임 언어 설정을 따릅니다. 한국어로 설정하면 한국어, 그 외 언어는 영어로 표시됩니다.
+Menus and messages follow the game's language setting: Korean (ko_KR) or English for every other language.
+번역 파일: `src/main/resources/assets/selfskin/lang/` (`en_US.lang`, `ko_KR.lang`). 다른 언어는 같은 형식으로 파일을 추가하면 됩니다.
+
 ## 동작 원리
 내 `NetworkPlayerInfo`의 `locationSkin` / `skinType` 필드를 매 프레임 내 텍스처로 덮어씁니다. 3인칭 모델, 1인칭 팔, 인벤토리 미리보기, 탭 리스트 머리 아이콘이 모두 이 값을 사용합니다. Mixin이나 코어모드 없이 Forge 이벤트와 리플렉션만 사용합니다.
 
