@@ -218,6 +218,16 @@ public class SkinConfig {
         return null;
     }
 
+    /** 목록에서 스킨 순서를 옮긴다 (delta: -1 위로, +1 아래로). 옮겼으면 true */
+    public boolean move(SkinEntry e, int delta) {
+        int from = skins.indexOf(e);
+        int to = from + delta;
+        if (from < 0 || to < 0 || to >= skins.size()) return false;
+        Collections.swap(skins, from, to);
+        save();
+        return true;
+    }
+
     /** 스킨 파일을 지우고 목록에서 뺀다. 실패하면 오류 메시지 */
     public String delete(SkinEntry e) {
         File f = new File(skinsDir, e.file);

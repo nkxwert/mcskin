@@ -79,3 +79,13 @@ selfskin.error.defaultSkin=This account uses a default skin.
 selfskin.error.unreadable=Can't read the image: %s
 selfskin.error.notPng=Not a PNG file.
 selfskin.error.badSize=Skins must be 64x64 or 64x32 (this one is %sx%s).
+
+selfskin.gui.moveUp=▲ Up
+selfskin.gui.moveDown=▼ Down
+selfskin.gui.pasteHint=§7Ctrl+V: add copied png files
+selfskin.status.imported=Added %s skin(s)
+selfskin.status.importedSkipped=Added %s, skipped %s (%s)
+selfskin.error.clipboardEmpty=No copied png file. Copy a png in your file explorer (Ctrl+C), then press Ctrl+V here.
+selfskin.error.clipboardNoAlpha=This image has no transparency and would look broken. Copy the png file instead.
+selfskin.error.clipboardFailed=Couldn't read the clipboard: %s
+selfskin.error.notPngFile=Not a png file: %s

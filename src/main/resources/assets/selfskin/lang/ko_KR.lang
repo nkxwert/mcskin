@@ -79,3 +79,13 @@ selfskin.error.defaultSkin=기본 스킨을 쓰는 계정입니다.
 selfskin.error.unreadable=이미지를 읽을 수 없습니다: %s
 selfskin.error.notPng=PNG 파일이 아닙니다.
 selfskin.error.badSize=스킨 크기는 64x64 또는 64x32여야 합니다. (현재 %sx%s)
+
+selfskin.gui.moveUp=▲ 위로
+selfskin.gui.moveDown=▼ 아래로
+selfskin.gui.pasteHint=§7Ctrl+V: 복사한 png 파일 추가
+selfskin.status.imported=스킨 %s개 추가됨
+selfskin.status.importedSkipped=%s개 추가, %s개 건너뜀 (%s)
+selfskin.error.clipboardEmpty=복사한 png 파일이 없습니다. 파일 탐색기에서 png를 복사(Ctrl+C)한 뒤 여기서 Ctrl+V를 누르세요.
+selfskin.error.clipboardNoAlpha=투명도가 없는 이미지라 스킨이 깨져 보입니다. 이미지 대신 png 파일을 복사해 주세요.
+selfskin.error.clipboardFailed=클립보드를 읽지 못했습니다: %s
+selfskin.error.notPngFile=png 파일이 아닙니다: %s

@@ -18,7 +18,7 @@ public class GuiSelfSkin extends GuiScreen implements GuiYesNoCallback {
 
     private static final int BTN_DONE = 0, BTN_TOGGLE = 1, BTN_MODEL = 2, BTN_FOLDER = 3,
             BTN_REFRESH = 4, BTN_FETCH = 5, BTN_VISIBILITY = 6, BTN_RENAME = 7, BTN_DELETE = 8,
-            BTN_PREV = 10, BTN_NEXT = 11, BTN_ENTRY = 100;
+            BTN_UP = 9, BTN_DOWN = 12, BTN_PREV = 10, BTN_NEXT = 11, BTN_ENTRY = 100;
     private static final int CONFIRM_DELETE = 1;
 
     /** 이름 바꾸기/삭제 대상. 목록에서 누른 스킨 (적용에 실패해도 선택은 된다) */
@@ -98,6 +98,16 @@ public class GuiSelfSkin extends GuiScreen implements GuiYesNoCallback {
         buttonList.add(new GuiButton(BTN_REFRESH, colX + folderW + 2, 76, colW - folderW - 2, 20, L.t("gui.refresh")));
         // 갑옷 / 머리 블록 / 망토 보임 설정은 별도 화면
         buttonList.add(new GuiButton(BTN_VISIBILITY, colX, 98, colW, 20, L.t("gui.visibility")));
+        // 선택한 스킨을 목록에서 위/아래로 옮기기
+        SkinConfig.SkinEntry sel = getSelected();
+        int selIdx = sel != null ? list.indexOf(sel) : -1;
+        int upW = (colW - 2) / 2;
+        GuiButton up = new GuiButton(BTN_UP, colX, 120, upW, 20, L.t("gui.moveUp"));
+        GuiButton down = new GuiButton(BTN_DOWN, colX + colW - upW, 120, upW, 20, L.t("gui.moveDown"));
+        up.enabled = selIdx > 0;
+        down.enabled = selIdx >= 0 && selIdx < list.size() - 1;
+        buttonList.add(up);
+        buttonList.add(down);
 
         GuiButton fetch = new GuiButton(BTN_FETCH, left + listW + 4, height - 29, 60, 20, L.t("gui.fetch"));
         fetch.enabled = !fetching;
@@ -138,6 +148,11 @@ public class GuiSelfSkin extends GuiScreen implements GuiYesNoCallback {
                 setStatus(err == null ? L.t("status.count", cfg.skins.size()) : err, err == null ? 0xAAAAAA : 0xFF5555);
             } else {
                 setStatus(L.t("status.count", cfg.skins.size()), 0xAAAAAA);
+            }
+        } else if (b.id == BTN_UP || b.id == BTN_DOWN) {
+            SkinConfig.SkinEntry e = getSelected();
+            if (e != null && cfg.move(e, b.id == BTN_UP ? -1 : 1)) {
+                page = cfg.skins.indexOf(e) / rows; // 옮긴 스킨이 다른 페이지로 넘어가면 따라간다
             }
         } else if (b.id == BTN_VISIBILITY) {
             mc.displayGuiScreen(new GuiVisibility(this));
@@ -287,12 +302,43 @@ public class GuiSelfSkin extends GuiScreen implements GuiYesNoCallback {
         nameField.drawTextBox();
         if (!status.isEmpty()) {
             drawCenteredString(fontRendererObj, status, width / 2, height - 52, statusColor);
+        } else {
+            drawCenteredString(fontRendererObj, L.t("gui.pasteHint"), width / 2, height - 52, 0xFFFFFF);
         }
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 
+    /** Ctrl+V: 탐색기에서 복사한 png 파일(또는 이미지)을 스킨 폴더에 추가하고, 마지막 것을 적용한다 */
+    private void pasteSkins() {
+        SkinImporter.Result r = SkinImporter.fromClipboard(SkinConfig.getSkinsDir());
+        SkinConfig cfg = SelfSkinMod.config;
+        if (r.added > 0) {
+            cfg.syncWithFolder();
+            SkinConfig.SkinEntry e = cfg.find(r.lastFile);
+            if (e != null) {
+                selectedFile = e.file;
+                page = cfg.skins.indexOf(e) / rows;
+                String err = SelfSkinMod.apply(e);
+                if (err != null) {
+                    setStatus(err, 0xFF5555);
+                    dirty = true;
+                    return;
+                }
+            }
+            if (r.skipped > 0) setStatus(L.t("status.importedSkipped", r.added, r.skipped, r.error), 0xFFFF55);
+            else setStatus(L.t("status.imported", r.added), 0x55FF55);
+        } else {
+            setStatus(r.error != null ? r.error : L.t("error.clipboardEmpty"), 0xFF5555);
+        }
+        dirty = true;
+    }
+
     @Override
     protected void keyTyped(char c, int key) throws IOException {
+        if (!nameField.isFocused() && GuiScreen.isKeyComboCtrlV(key)) {
+            pasteSkins();
+            return;
+        }
         if (nameField.isFocused()) {
             if (key == Keyboard.KEY_RETURN) {
                 if (!fetching) startFetch();
