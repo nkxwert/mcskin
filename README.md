@@ -42,3 +42,6 @@ JDK 17을 설치한 뒤:
 
 ## 동작 원리
 내 `NetworkPlayerInfo`의 `locationSkin` / `skinType` 필드를 매 프레임 내 텍스처로 덮어씁니다. 3인칭 모델, 1인칭 팔, 인벤토리 미리보기, 탭 리스트 머리 아이콘이 모두 이 값을 사용합니다. Mixin이나 코어모드 없이 Forge 이벤트와 리플렉션만 사용합니다.
+
+## 라이선스
+[MIT](LICENSE) © 2026 noshkim
