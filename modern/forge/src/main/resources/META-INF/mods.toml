@@ -1,0 +1,29 @@
+modLoader="javafml"
+loaderVersion="[66,)"
+license="MIT"
+issueTrackerURL="https://github.com/nkxwert/mcskin/issues"
+clientSideOnly=true
+
+[[mods]]
+modId="selfskin"
+version="${version}"
+displayName="Self Skin"
+authors="nkxwert"
+description='''A skin only you can see. Client-side only: nothing is sent to the server, so other players still see your real skin.
+Also hides your own armor, head block and cape (only for you).
+
+나에게만 보이는 스킨. 서버로 아무것도 보내지 않는 클라이언트 전용 외형 모드.'''
+
+[[dependencies.selfskin]]
+    modId="forge"
+    mandatory=true
+    versionRange="[66,)"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.selfskin]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[26.3,26.4)"
+    ordering="NONE"
+    side="CLIENT"

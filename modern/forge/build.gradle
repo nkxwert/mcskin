@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle' version '[7.0.17,8)'
+}
+
+version = '2.0.0+26.3'
+group = 'dev.selfskin'
+base { archivesName = 'selfskin-forge' }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+// 공통 코드(../common)를 같이 컴파일한다
+sourceSets.main {
+    java.srcDir '../common/src/main/java'
+    resources.srcDir '../common/src/main/resources'
+}
+
+minecraft {
+    runs {
+        configureEach {
+            workingDir = layout.projectDirectory.dir('run')
+        }
+        register('client')
+    }
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+}
+
+dependencies {
+    implementation minecraft.dependency('net.minecraftforge:forge:26.3-66.1.9')
+    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0.6'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+processResources {
+    def v = project.version
+    inputs.property 'version', v
+    filesMatching('META-INF/mods.toml') { expand 'version': v }
+}
+
+jar {
+    // Forge는 jar 매니페스트의 MixinConfigs로 Mixin 설정을 불러온다
+    manifest.attributes('MixinConfigs': 'selfskin.mixins.json')
+    from(rootProject.file('../../LICENSE')) { rename { 'LICENSE_selfskin' } }
+}
