@@ -51,5 +51,21 @@ Menus and messages follow the game's language setting: Korean (ko_KR) or English
 ## 동작 원리
 내 `NetworkPlayerInfo`의 `locationSkin` / `skinType` 필드를 매 프레임 내 텍스처로 덮어씁니다. 3인칭 모델, 1인칭 팔, 인벤토리 미리보기, 탭 리스트 머리 아이콘이 모두 이 값을 사용합니다. Mixin이나 코어모드 없이 Forge 이벤트와 리플렉션만 사용합니다.
 
+## 최신 버전 (Minecraft 26.3) — Fabric / Forge
+`modern/` 폴더에 26.3용 버전이 있습니다. 기능은 1.8.9 버전과 같고, 스킨 png를 **게임 창에 끌어다 놓으면** 바로 추가됩니다.
+
+| 로더 | 폴더 | 필요 조건 |
+|---|---|---|
+| Fabric | `modern/fabric` | Fabric Loader 0.20.1+, Fabric API |
+| Forge | `modern/forge` | Forge 66.1.9+ |
+
+공통 코드는 `modern/common`에 있고, 두 로더가 같이 사용합니다. Java 25가 필요합니다.
+```
+cd modern/fabric && ./gradlew build   # → build/libs/selfskin-fabric-2.0.0+26.3.jar
+cd modern/forge  && ./gradlew build   # → build/libs/selfskin-forge-2.0.0+26.3.jar
+```
+설정 파일과 스킨 폴더는 1.8.9 버전과 같은 위치·형식입니다 (`config/selfskin.json`, `selfskin/skins/`).
+명령어도 같습니다. 다만 26.3에서는 명령어 부위 이름에 한글을 쓸 수 없어서 영어(`helmet` 등)만 지원합니다.
+
 ## 라이선스
 [MIT](LICENSE) © 2026 nkxwert

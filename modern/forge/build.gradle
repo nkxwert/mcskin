@@ -19,6 +19,8 @@ minecraft {
     runs {
         configureEach {
             workingDir = layout.projectDirectory.dir('run')
+            // 개발 실행은 jar가 아니라 빌드 폴더에서 불러오므로 매니페스트(MixinConfigs)를 읽지 않는다
+            args '--mixin.config', 'selfskin.mixins.json'
         }
         register('client')
     }
